@@ -17,6 +17,7 @@ class pySimio():
             }
         self.personalAccessToken = None
         self.logger = logger
+        self.samlResponse = None
            
     def status(self):
         """
@@ -42,21 +43,30 @@ class pySimio():
         """        
         try:
             if self.personalAccessToken is not None:
-                self.authenticate(self.personalAccessToken)
+                self.authenticate(personalAccessToken=self.personalAccessToken)
                 return True
+            elif self.samlResponse is not None:
+                self.authenticate(samlResponse=self.samlResponse)
             else:
                 raise AuthenticationError
         except Exception:
             self.logger.exception("An unhandled exception occurred - please try again")
     
     def authenticate(self, 
-                     personalAccessToken: str
+                     personalAccessToken: str = None,
+                     samlResponse: str = None
                     ):
         try:
-            self.personalAccessToken = personalAccessToken
-            authBody = {
-                "personalAccessToken": personalAccessToken
-            }
+            if samlAssertion is not None:
+                self.samlResponse = samlResponse
+                authBody = {
+                    "samlResponse": samlResponse
+                }
+            else:
+                self.personalAccessToken = personalAccessToken
+                authBody = {
+                    "personalAccessToken": personalAccessToken
+                }
             authenticationRequest = requests.post(f"{self.apiURL}/auth", json=authBody)
             if authenticationRequest.status_code == 200:
                 authenticationRequest = authenticationRequest.json()
