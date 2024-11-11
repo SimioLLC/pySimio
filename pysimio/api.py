@@ -57,7 +57,7 @@ class pySimio():
                      samlResponse: str = None
                     ):
         try:
-            if samlAssertion is not None:
+            if samlResponse is not None:
                 self.samlResponse = samlResponse
                 authBody = {
                     "samlResponse": samlResponse
