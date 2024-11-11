@@ -1,0 +1,18 @@
+[tool.poetry]
+name = "pysimio"
+version = "0.0.1"
+description = ""
+authors = ["Trevor Reed <treed@simio.com>"]
+readme = "README.md"
+
+[tool.poetry.dependencies]
+python = "^3.9"
+requests = "^2.32.3"
+http-exceptions = "^0.2.10"
+tenacity = "^9.0.0"
+decorator = "^5.1.1"
+
+
+[build-system]
+requires = ["poetry-core"]
+build-backend = "poetry.core.masonry.api"
