@@ -1,4 +1,5 @@
 import requests
+import json
 from http_exceptions import HTTPException, UnauthorizedException
 from tenacity import retry, retry_if_exception_type, stop_after_attempt
 from pysimio.exceptions import AuthenticationError
@@ -498,5 +499,52 @@ class pySimio():
                 return request.json()
             else:
                 raise HTTPException.from_status_code(status_code=request.status_code)(message=request.text)
+        except Exception:
+            self.logger.exception("An unhandled exception occurred - please try again")
+            
+    @retry(retry=retry_if_exception_type(UnauthorizedException), stop=stop_after_attempt(2), before=lambda retry_state: retry_state.args[0].reauthenticate())
+    def deleteModel(self, 
+                  modelId: int
+                ):
+        try:
+            request = requests.delete(f"{self.apiURL}/v1/models/{modelId}", headers=self.headers)
+            if request.status_code == 204:
+                return True
+            else:
+                raise HTTPException.from_status_code(status_code=request.status_code)(message=request.text)
+        except Exception:
+            self.logger.exception("An unhandled exception occurred - please try again")
+            
+    @retry(retry=retry_if_exception_type(UnauthorizedException), stop=stop_after_attempt(2), before=lambda retry_state: retry_state.args[0].reauthenticate())
+    def deleteProject(self, 
+                  projectId: int
+                ):
+        try:
+            request = requests.delete(f"{self.apiURL}/v1/projects/{projectId}", headers=self.headers)
+            if request.status_code == 204:
+                return True
+            else:
+                raise HTTPException.from_status_code(status_code=request.status_code)(message=request.text)
+        except Exception:
+            self.logger.exception("An unhandled exception occurred - please try again")
+            
+    @retry(retry=retry_if_exception_type(UnauthorizedException), stop=stop_after_attempt(2), before=lambda retry_state: retry_state.args[0].reauthenticate())
+    def uploadProject(self, 
+                             projectName: str, 
+                             projectFile: str
+                            ):
+        try:
+            body = json.dumps({"ProjectName": projectName}).encode('utf-8')
+            files=[
+                ('', ('', body, 'application/json')),
+                ('',('projectFile',open(f'{projectFile}','rb'),'application/octet-stream'))
+            ]
+            request = requests.post(f"{self.apiURL}/v1/projects/upload", headers=self.headers, files=files)
+            print(request.request.headers)
+            print(request.request.body)
+            if request.status_code == 201:
+                return request.text
+            else:
+               raise HTTPException.from_status_code(status_code=request.status_code)(message=request.text)
         except Exception:
             self.logger.exception("An unhandled exception occurred - please try again")
