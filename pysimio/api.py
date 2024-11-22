@@ -548,3 +548,29 @@ class pySimio():
                raise HTTPException.from_status_code(status_code=request.status_code)(message=request.text)
         except Exception:
             self.logger.exception("An unhandled exception occurred - please try again")
+
+    @retry(retry=retry_if_exception_type(UnauthorizedException), stop=stop_after_attempt(2), before=lambda retry_state: retry_state.args[0].reauthenticate())
+    def getProjects(self):
+        try:
+            request = requests.get(f"{self.apiURL}/v1/projects", headers=self.headers)
+            if request.status_code == 200:
+                return request.json()
+            else:
+                raise HTTPException.from_status_code(status_code=request.status_code)(message=request.text)
+        except Exception:
+            self.logger.exception("An unhandled exception occurred - please try again")
+
+    @retry(retry=retry_if_exception_type(UnauthorizedException), stop=stop_after_attempt(2), before=lambda retry_state: retry_state.args[0].reauthenticate())
+    def getProject(self, 
+                    projectId: int
+                ):
+        try:
+            request = requests.get(f"{self.apiURL}/v1/projects/{projectId}", headers=self.headers)
+            if request.status_code == 200:
+                return request.json()
+            else:
+                raise HTTPException.from_status_code(status_code=request.status_code)(message=request.text)
+        except Exception:
+            self.logger.exception("An unhandled exception occurred - please try again")
+            
+            
