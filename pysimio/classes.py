@@ -1,4 +1,4 @@
-from datetime import datetime
+from datetime import datetime, timezone
 
 class SimioScenario():
     def __init__(self, **kwargs):
@@ -53,11 +53,11 @@ class SimioExperimentRun():
             self.concurrent_replication_limit = kwargs.get('concurrent_replication_limit', 0)
             self.start_end_time = kwargs.get('start_end_time', {
                 "isSpecificStartTime": True,
-                "specificStartingTime": datetime.now(datetime.timezone.utc).isoformat().replace('+00:00', 'Z'),
+                "specificStartingTime": datetime.now(timezone.utc).isoformat().replace('+00:00', 'Z'),
                 "startTimeSelection": "Second",
                 "isSpecificEndTime": True,
                 "isInfinite": True,
-                "specificEndingTime": datetime.now(datetime.timezone.utc).isoformat().replace('+00:00', 'Z'),
+                "specificEndingTime": datetime.now(timezone.utc).isoformat().replace('+00:00', 'Z'),
                 "isRunLength": True,
                 "endTimeSelection": "Hours",
                 "endTimeRunValue": 0
@@ -86,7 +86,7 @@ class SimioExperimentRun():
         self.run_replications = kwargs.get('run_replications', True)
         self.allow_export_at_end_of_replication = kwargs.get('allow_export_at_end_of_replication', True)
         
-        self.create_info = self.CreateInfo(**kwargs.get('create_info', {}))
+        self.create_info = self.CreateInfo(**(kwargs.get('create_info', {})))
         
     def update(self, key, value):
         if hasattr(self, key):
