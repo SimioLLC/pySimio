@@ -3,7 +3,6 @@ import json
 from http_exceptions import HTTPException, UnauthorizedException
 from tenacity import retry, retry_if_exception_type, stop_after_attempt
 from pysimio.exceptions import AuthenticationError
-from pysimio.classes import SimioExperimentRun
 from pysimio.logger import logger
 
 class pySimio():
@@ -388,10 +387,10 @@ class pySimio():
 
     @retry(retry=retry_if_exception_type(UnauthorizedException), stop=stop_after_attempt(2), before=lambda retry_state: retry_state.args[0].reauthenticate())
     def startRun(self, 
-                 experimentRunData: SimioExperimentRun
+                 experimentRunData: dict
                 ):
         try:
-            body = experimentRunData.get_data()
+            body = experimentRunData
             request = requests.post(f"{self.apiURL}/v1/runs/start-experiment-run", headers=self.headers, json=body)
             if request.status_code == 201:
                 return request.json()
