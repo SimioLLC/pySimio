@@ -320,11 +320,12 @@ class pySimio():
     
     @retry(retry=retry_if_exception_type(UnauthorizedException), stop=stop_after_attempt(2), before=lambda retry_state: retry_state.args[0].reauthenticate())
     def setRunTimeOptions(self, 
-                          runId: int, 
-                          specificStartingTime: str, 
-                          startTimeSelection: str, 
-                          specificEndingTime: str, 
-                          endTimeSelection: str, endTimeRunValue: int, 
+                          runId: int,
+                          endTimeRunValue: int,
+                          specificStartingTime: str = "", 
+                          startTimeSelection: str = "", 
+                          specificEndingTime: str = "", 
+                          endTimeSelection: str = "", 
                           isSpecificStartTime: bool = True, 
                           isSpecificEndTime: bool = False, 
                           isInfinite: bool = True, 
@@ -571,5 +572,57 @@ class pySimio():
                 raise HTTPException.from_status_code(status_code=request.status_code)(message=request.text)
         except Exception:
             self.logger.exception("An unhandled exception occurred - please try again")
-            
-            
+    
+    @retry(retry=retry_if_exception_type(UnauthorizedException), stop=stop_after_attempt(2), before=lambda retry_state: retry_state.args[0].reauthenticate())
+    def setControlValues(self, 
+                          runId: int, 
+                          scenarioName: str, 
+                          controlName: str, 
+                          controlValue: str
+                        ):
+        try:
+            body = {
+                "value": controlValue
+            }
+            request = requests.put(f"{self.apiURL}/v1/runs/{runId}/scenarios/{scenarioName}/control-values/{controlName}", headers=self.headers, json=body)
+            if request.status_code == 204:
+                return True
+            else:
+                raise HTTPException.from_status_code(status_code=request.status_code)(message=request.text)
+        except Exception:
+            self.logger.exception("An unhandled exception occurred - please try again")
+
+    @retry(retry=retry_if_exception_type(UnauthorizedException), stop=stop_after_attempt(2), before=lambda retry_state: retry_state.args[0].reauthenticate())
+    def setScenarioName(self, 
+                          runId: int, 
+                          existingScenarioName: str, 
+                          newScenarioName: str 
+                        ):
+        try:
+            body = {
+                "value": newScenarioName
+            }
+            request = requests.put(f"{self.apiURL}/v1/runs/{runId}/scenarios/{existingScenarioName}/name", headers=self.headers, json=body)
+            if request.status_code == 204:
+                return True
+            else:
+                raise HTTPException.from_status_code(status_code=request.status_code)(message=request.text)
+        except Exception:
+            self.logger.exception("An unhandled exception occurred - please try again")
+
+    @retry(retry=retry_if_exception_type(UnauthorizedException), stop=stop_after_attempt(2), before=lambda retry_state: retry_state.args[0].reauthenticate())
+    def modifyDataConnectorConfiguration(self, 
+                  runId: int,
+                  scenarioName: str
+                ):
+        try:
+            body = {
+                "status": "cancelled"
+            }
+            request = requests.patch(f"{self.apiURL}/v1/runs/{runId}", headers=self.headers, json=body)
+            if request.status_code == 204:
+                return True
+            else:
+                raise HTTPException.from_status_code(status_code=request.status_code)(message=request.text)
+        except Exception:
+            self.logger.exception("An unhandled exception occurred - please try again")
