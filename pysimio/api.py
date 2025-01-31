@@ -321,7 +321,7 @@ class pySimio():
     @retry(retry=retry_if_exception_type(UnauthorizedException), stop=stop_after_attempt(2), before=lambda retry_state: retry_state.args[0].reauthenticate())
     def setRunTimeOptions(self, 
                           runId: int,
-                          endTimeRunValue: int,
+                          endTimeRunValue: int = 0,
                           specificStartingTime: str = "", 
                           startTimeSelection: str = "", 
                           specificEndingTime: str = "", 
