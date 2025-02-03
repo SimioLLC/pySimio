@@ -129,33 +129,33 @@ class SimioExperimentRun():
 @dataclass
 class TimeOptions(SimioDataClass):
     runId: int
-    endTimeRunValue: Optional[int]
-    specificStartingTime: Optional[str]
-    startTimeSelection: Optional[str]
-    specificEndingTime: Optional[str]
-    endTimeSelection: Optional[str]
-    isSpecificStartTime: Optional[bool]
-    isSpecificEndTime: Optional[bool]
-    isInfinite: Optional[bool]
-    isRunLength: Optional[bool]
+    endTimeRunValue: Optional[int] = None
+    specificStartingTime: Optional[str] = None
+    startTimeSelection: Optional[str] = None
+    specificEndingTime: Optional[str] = None
+    endTimeSelection: Optional[str] = None
+    isSpecificStartTime: Optional[bool] = None
+    isSpecificEndTime: Optional[bool] = None
+    isInfinite: Optional[bool] = None
+    isRunLength: Optional[bool] = None
 
 @dataclass
 class SimioExperiment(SimioDataClass):
     id: int
-    name: Optional[str]
-    modelId: Optional[int]
-    modelName: Optional[str]
-    projectName: Optional[str]
-    hasExperimentRuns: Optional[bool]
-    hasPlanRuns: Optional[bool]
+    name: Optional[str] = None
+    modelId: Optional[int] = None
+    modelName: Optional[str] = None
+    projectName: Optional[str] = None
+    hasExperimentRuns: Optional[bool] = None
+    hasPlanRuns: Optional[bool] = None
 
 @dataclass
 class SimioModel(SimioDataClass):
     id: int
-    name: Optional[str]
-    projectId: Optional[int]
-    projectName: Optional[str]
-    projectOwner: Optional[str]
-    projectUploadDateTime: Optional[str]
-    projectSavedDate: Optional[str]
-    projectSavedInVersion: Optional[str]
+    name: Optional[str] = None
+    projectId: Optional[int] = None
+    projectName: Optional[str] = None
+    projectOwner: Optional[str] = None
+    projectUploadDateTime: Optional[str] = None
+    projectSavedDate: Optional[str] = None
+    projectSavedInVersion: Optional[str] = None

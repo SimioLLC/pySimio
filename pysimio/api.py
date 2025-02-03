@@ -324,6 +324,7 @@ class pySimio():
                           timeOptions: TimeOptions
                         ):
         try:
+            runId = timeOptions.runId
             body = timeOptions.as_json()
             request = requests.put(f"{self.apiURL}/v1/runs/{runId}/time-options", headers=self.headers, json=body)
             if request.status_code == 204:
