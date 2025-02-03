@@ -4,6 +4,7 @@ from http_exceptions import HTTPException, UnauthorizedException
 from tenacity import retry, retry_if_exception_type, stop_after_attempt
 from pysimio.exceptions import AuthenticationError
 from pysimio.logger import logger
+from pysimio.classes import TimeOptions, SimioExperiment, SimioModel
 
 class pySimio():
     def __init__(self, 
@@ -124,7 +125,7 @@ class pySimio():
         try:
             modelRequest = requests.get(f"{self.apiURL}/v1/models/{model_id}", headers=self.headers)
             if modelRequest.status_code == 200:
-                return modelRequest.json()
+                return SimioModel.from_json(modelRequest.json())
             else:
                 raise HTTPException.from_status_code(status_code=modelRequest.status_code)(message=modelRequest.text)
         except Exception:
@@ -175,7 +176,7 @@ class pySimio():
         try:
             experimentRequest = requests.get(f"{self.apiURL}/v1/experiments/{experiment_id}", headers=self.headers)
             if experimentRequest.status_code == 200:
-                return experimentRequest.json()
+                return SimioExperiment().from_json(experimentRequest.json())
             else:
                 raise HTTPException.from_status_code(status_code=experimentRequest.status_code)(message=experimentRequest.text)
         except Exception:
@@ -320,29 +321,10 @@ class pySimio():
     
     @retry(retry=retry_if_exception_type(UnauthorizedException), stop=stop_after_attempt(2), before=lambda retry_state: retry_state.args[0].reauthenticate())
     def setRunTimeOptions(self, 
-                          runId: int,
-                          endTimeRunValue: int = 0,
-                          specificStartingTime: str = "", 
-                          startTimeSelection: str = "", 
-                          specificEndingTime: str = "", 
-                          endTimeSelection: str = "", 
-                          isSpecificStartTime: bool = True, 
-                          isSpecificEndTime: bool = False, 
-                          isInfinite: bool = True, 
-                          isRunLength: bool=True
+                          timeOptions: TimeOptions
                         ):
         try:
-            body = {
-                "isSpecificStartTime": isSpecificStartTime,
-                "specificStartingTime": specificStartingTime,
-                "startTimeSelection": startTimeSelection,
-                "isSpecificEndTime": isSpecificEndTime,
-                "isInfinite": isInfinite,
-                "specificEndingTime": specificEndingTime,
-                "isRunLength": isRunLength,
-                "endTimeSelection": endTimeSelection,
-                "endTimeRunValue": endTimeRunValue
-            }
+            body = timeOptions.as_json()
             request = requests.put(f"{self.apiURL}/v1/runs/{runId}/time-options", headers=self.headers, json=body)
             if request.status_code == 204:
                 return True

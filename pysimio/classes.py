@@ -1,4 +1,24 @@
 from datetime import datetime, timezone
+from dataclasses import dataclass, asdict, fields
+from typing import Optional
+import json
+
+@dataclass
+class SimioDataClass:
+    def as_json(self, include_null: bool = False) -> dict:
+        return asdict(
+                self,
+                dict_factory=lambda fields: {
+                    key: value
+                    for (key, value) in fields
+                    if value is not None or include_null
+                },
+            )
+    
+    @classmethod
+    def from_json(cls, data: dict):
+
+        return cls(**data)  # Create an instance of the dataclass
 
 class SimioScenario():
     def __init__(self, **kwargs):
@@ -105,3 +125,37 @@ class SimioExperimentRun():
             "allowExportAtEndOfReplication": self.allow_export_at_end_of_replication,
             "createInfo": self.create_info.get_info()  # Retrieve info from the nested CreateInfo class
         }
+
+@dataclass
+class TimeOptions(SimioDataClass):
+    runId: int
+    endTimeRunValue: Optional[int]
+    specificStartingTime: Optional[str]
+    startTimeSelection: Optional[str]
+    specificEndingTime: Optional[str]
+    endTimeSelection: Optional[str]
+    isSpecificStartTime: Optional[bool]
+    isSpecificEndTime: Optional[bool]
+    isInfinite: Optional[bool]
+    isRunLength: Optional[bool]
+
+@dataclass
+class SimioExperiment(SimioDataClass):
+    id: int
+    name: Optional[str]
+    modelId: Optional[int]
+    modelName: Optional[str]
+    projectName: Optional[str]
+    hasExperimentRuns: Optional[bool]
+    hasPlanRuns: Optional[bool]
+
+@dataclass
+class SimioModel(SimioDataClass):
+    id: int
+    name: Optional[str]
+    projectId: Optional[int]
+    projectName: Optional[str]
+    projectOwner: Optional[str]
+    projectUploadDateTime: Optional[str]
+    projectSavedDate: Optional[str]
+    projectSavedInVersion: Optional[str]
