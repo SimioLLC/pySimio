@@ -261,7 +261,8 @@ class pySimio():
     @retry(retry=retry_if_exception_type(UnauthorizedException), stop=stop_after_attempt(2), before=lambda retry_state: retry_state.args[0].reauthenticate())
     def getRuns(self, 
                 experimentId: int = None,
-                experimentName: str = None
+                experimentName: str = None,
+                modelId: int = None
             ):
         try:
             params = []
@@ -269,6 +270,8 @@ class pySimio():
                 params.append(('experiment_id', experimentId))
             if experimentName is not None:
                 params.append(('name', experimentName))
+            if modelId is not None:
+                params.append(('model_id', modelId))
             request = requests.get(f"{self.apiURL}/v1/runs", headers=self.headers, params=params)
             if request.status_code == 200:
                 return request.json()
