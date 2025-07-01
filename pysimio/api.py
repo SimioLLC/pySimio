@@ -286,10 +286,7 @@ class pySimio():
                 runId: int = None
             ):
         try:
-            params = []
-            if runId is not None:
-                params.append(('run_id', runId))
-            request = requests.get(f"{self.apiURL}/v1/runs", headers=self.headers, params=params)
+            request = requests.get(f"{self.apiURL}/v1/runs/{runId}", headers=self.headers)
             if request.status_code == 200:
                 return request.json()
             else:
