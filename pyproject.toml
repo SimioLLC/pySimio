@@ -1,6 +1,6 @@
 [tool.poetry]
 name = "pysimio"
-version = "1.1.0"
+version = "1.2.0"
 description = ""
 authors = ["Trevor Reed <treed@simio.com>"]
 readme = "README.md"
