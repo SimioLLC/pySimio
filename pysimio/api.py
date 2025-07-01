@@ -176,7 +176,8 @@ class pySimio():
         try:
             experimentRequest = requests.get(f"{self.apiURL}/v1/experiments/{experiment_id}", headers=self.headers)
             if experimentRequest.status_code == 200:
-                return SimioExperiment().from_json(experimentRequest.json())
+                print(experimentRequest.json())
+                return SimioExperiment.from_json(experimentRequest.json())
             else:
                 raise HTTPException.from_status_code(status_code=experimentRequest.status_code)(message=experimentRequest.text)
         except Exception:

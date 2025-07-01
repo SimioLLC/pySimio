@@ -44,8 +44,8 @@ api.authenticate(personalAccessToken=personal_access_token)
 * cancelRun: Cancels a specific Simio Run within Simio Portal
 * setRunTimeOptions: Sets the Time Options on a specific Simio Portal Run
 * cancelPlan: Cancels a specific Simio Plan within Simio Portal
-* createRun: Creats a new Simio Run within Simio Portal
-* startRun: Initiates Simio Portal running a Simio Run
+* createRun: Creates a new Simio Run within Simio Portal
+* startRun: Creates and starts a new Simio Experiment run within Simio Portal. To update control parameters, you would add them to the "scenarios" section in the JSON and run it again.
 * createRunFromExisting: Create a new instances of a Simio Run within Simio Portal from an existing Simio Run
 * startRunFromExisting: Start a new run of a Simio Run from an existing Simio Run
 * getExport: Returns a json representation of a Simio Export from Simio Portal
