@@ -580,6 +580,28 @@ class pySimio():
             self.logger.exception("An unhandled exception occurred - please try again")
 
     @retry(retry=retry_if_exception_type(UnauthorizedException), stop=stop_after_attempt(2), before=lambda retry_state: retry_state.args[0].reauthenticate())
+    def getScenarios(self, 
+                  run_id: int = None, 
+                  include_observations: bool = False
+                ): 
+        try:
+            params = []
+            if run_id is not None:
+                params.append(('run_id', run_id))
+            if include_observations:
+                params.append(('include_observations', include_observations))
+            scenariosRequest = requests.get(f"{self.apiURL}/v1/runs/{run_id}/scenarios", params=params, headers=self.headers)
+            if scenariosRequest.status_code == 200:
+                return scenariosRequest.json()
+            elif scenariosRequest.status_code == 204:
+                return {}
+            else:
+                raise HTTPException.from_status_code(status_code=scenariosRequest.status_code)(message=scenariosRequest.text)
+        except Exception:
+            pass
+
+
+    @retry(retry=retry_if_exception_type(UnauthorizedException), stop=stop_after_attempt(2), before=lambda retry_state: retry_state.args[0].reauthenticate())
     def setScenarioName(self, 
                           runId: int, 
                           existingScenarioName: str, 

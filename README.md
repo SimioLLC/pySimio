@@ -58,6 +58,7 @@ api.authenticate(personalAccessToken=personal_access_token)
 * getProject: Returns a json representation of a Simio Project from Simio Portal
 * setControlValues: Update Control Values
 * setScenarioName: Update Scenario Name in a Simio Run within Simio Portal
+* getScenarios: Returns a json representation of a Simio Portal Scenario from a specified run
 
 ## License
 This project is licensed under the Apache License.
