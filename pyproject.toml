@@ -1,9 +1,10 @@
 [tool.poetry]
 name = "pysimio"
-version = "1.4.0"
+version = "1.5.0"
 description = ""
 authors = ["Trevor Reed <treed@simio.com>"]
 readme = "README.md"
+license = "Apache Licesne 2.0"
 
 [tool.poetry.dependencies]
 python = "^3.9"
