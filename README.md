@@ -30,14 +30,12 @@ api.authenticate(personalAccessToken=personal_access_token)
 * reauthenticate: Attempts to reauthenticate to the API using the PAT provided during authentication
 * authenticate: Authenticate to the API using a PAT or SAML Assertion
 * getModels: Returns a json list of all current Simio Portal models
-* getModel: Returns a json representation of a specific Simio Portal model
+* getModel: Returns an instance of the SimioModel class
 * getModelTable: Returns a json representation of a table on a Simio Portal model
 * getExperiments: Returns a json list of all current Simio Portal expermients on a model
-* getExperiment: Returns a json representation of a Simio Portal experiment
+* getExperiment: Returns an instance of the SimioExperiment class
 * publishPlan: Publish a specific Simio Plan within Simio Portal
 * uploadAndPublishPlan: Upload a Simio Model, and publish the plan within Simio Portal
-* publishRun: Publish a specific Simio Run within Simio Portal
-* deletePublishedRun: Deletes a published Simio Portal Run
 * getRuns: Returns a json list of all current Simio Portal runs
 * getRun: Returns a json representation of a specific Simio Portal run
 * deleteRun: Delete a specific Simio Run within Simio Portal
@@ -59,6 +57,50 @@ api.authenticate(personalAccessToken=personal_access_token)
 * setControlValues: Update Control Values
 * setScenarioName: Update Scenario Name in a Simio Run within Simio Portal
 * getScenarios: Returns a json representation of a Simio Portal Scenario from a specified run
+
+## Classes
+```python
+@dataclass
+class SimioDataClass:
+    def as_json(self, include_null: bool = False) -> dict:
+        return asdict(
+                self,
+                dict_factory=lambda fields: {
+                    key: value
+                    for (key, value) in fields
+                    if value is not None or include_null
+                },
+            )
+    
+    @classmethod
+    def from_json(cls, data: dict):
+
+        return cls(**data)  # Create an instance of the dataclass
+        
+@dataclass
+class SimioExperiment(SimioDataClass):
+    id: int
+    name: Optional[str] = None
+    modelId: Optional[int] = None
+    modelName: Optional[str] = None
+    projectName: Optional[str] = None
+    hasExperimentRuns: Optional[bool] = None
+    hasPlanRuns: Optional[bool] = None
+
+@dataclass
+class SimioModel(SimioDataClass):
+    id: int
+    name: Optional[str] = None
+    projectId: Optional[int] = None
+    projectName: Optional[str] = None
+    projectOwner: Optional[str] = None
+    projectUploadDateTime: Optional[str] = None
+    projectSavedDate: Optional[str] = None
+    projectSavedInVersion: Optional[str] = None
+
+```
+
+
 
 ## License
 This project is licensed under the Apache License.

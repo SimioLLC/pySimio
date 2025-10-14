@@ -227,39 +227,6 @@ class pySimio():
             self.logger.exception("An unhandled exception occurred - please try again")
 
     @retry(retry=retry_if_exception_type(UnauthorizedException), stop=stop_after_attempt(2), before=lambda retry_state: retry_state.args[0].reauthenticate())
-    def publishRun(self, 
-                   experimentRunId: int, 
-                   publishName: str, 
-                   publishDescription: str
-                ):
-        try:
-            body = {
-                "experimentRunId": experimentRunId,
-                "publishName": publishName,
-                "publishDescription": publishDescription
-            }
-            request = requests.post(f"{self.apiURL}/v1/published-runs", headers=self.headers, json=body)
-            if request.status_code == 201:
-                return request.text
-            else:
-                raise HTTPException.from_status_code(status_code=request.status_code)(message=request.text)
-        except Exception:
-            self.logger.exception("An unhandled exception occurred - please try again")
-    
-    @retry(retry=retry_if_exception_type(UnauthorizedException), stop=stop_after_attempt(2), before=lambda retry_state: retry_state.args[0].reauthenticate())
-    def deletePublishedRun(self, 
-                           publishedName: str
-                        ):
-        try:
-            request = requests.delete(f"{self.apiURL}/v1/published-runs/{publishedName}", headers=self.headers)
-            if request.status_code == 204:
-                return True
-            else:
-                raise HTTPException.from_status_code(status_code=request.status_code)(message=request.text)
-        except Exception:
-            self.logger.exception("An unhandled exception occurred - please try again")
-
-    @retry(retry=retry_if_exception_type(UnauthorizedException), stop=stop_after_attempt(2), before=lambda retry_state: retry_state.args[0].reauthenticate())
     def getRuns(self, 
                 experimentId: int = None,
                 experimentName: str = None,
