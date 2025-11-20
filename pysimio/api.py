@@ -2,7 +2,7 @@ import requests
 import json
 from http_exceptions import HTTPException, UnauthorizedException
 from tenacity import retry, retry_if_exception_type, stop_after_attempt
-from pysimio.exceptions import AuthenticationError
+from pysimio.exceptions import AuthenticationError, IncompatibleVersionError
 from pysimio.logger import logger
 from pysimio.classes import TimeOptions, SimioExperiment, SimioModel
 
@@ -19,6 +19,8 @@ class pySimio():
         self.personalAccessToken = None
         self.logger = logger
         self.samlResponse = None
+        self.portalVersion = ""
+        self.apiCompatibleVersion = "19.283"
            
     def status(self):
         """
@@ -74,12 +76,28 @@ class pySimio():
                 if authenticationRequest["token"]:
                     self.authToken = authenticationRequest["token"]
                     self.headers['Authorization'] = f"Bearer {self.authToken}"
+                    self.portalVersion = authenticationRequest.get("version", "")
                 else:
                     raise AuthenticationError
             else:
                 raise HTTPException.from_status_code(status_code=authenticationRequest.status_code)(message=authenticationRequest.text)
         except Exception:
             self.logger.exception("An unhandled exception occurred - please try again")
+
+    def is_version_compatible(self):
+        def parse_version(v):
+            try:
+                if not v:
+                    return (0, 0)
+                parts = v.split('.')[:2]
+                return tuple(int(part) if part.isdigit() else 0 for part in parts + ['0', '0'][:2 - len(parts)])
+            except Exception:
+                return (0, 0)
+
+        base_major, base_minor = parse_version(self.apiCompatibleVersion)
+        current_major, current_minor = parse_version(self.portalVersion)
+
+        return (current_major, current_minor) >= (base_major, base_minor)
             
     @retry(retry=retry_if_exception_type(UnauthorizedException), stop=stop_after_attempt(2), before=lambda retry_state: retry_state.args[0].reauthenticate())
     def getModels(self, 
@@ -438,7 +456,10 @@ class pySimio():
     def getTableData(self, 
                   runId: int, 
                   scenarioName: str,
-                  tableName: str
+                  tableName: str,
+                  page: int = None,
+                  pageSize: int = None,
+                  filter: str = None
                   ):
         try:
             params = []
@@ -448,6 +469,17 @@ class pySimio():
                 params.append(('scenario_name', scenarioName))
             if tableName is not None:
                 params.append(('table_name', tableName))
+            if page is not None:
+                params.append(('page', page))
+            if pageSize is not None:
+                params.append(('page_size', pageSize))
+
+            if filter is not None:
+                if self.is_version_compatible():
+                    params.append(('filter', filter))
+                else:
+                    raise IncompatibleVersionError(f"Filtering is not supported on portal versions below {self.apiCompatibleVersion}. Current version is {self.portalVersion}.")
+
             request = requests.get(f"{self.apiURL}/v1/runs/{runId}/scenarios/{scenarioName}/table-data/{tableName}", headers=self.headers, params=params)
             if request.status_code == 200:
                 return request.json()

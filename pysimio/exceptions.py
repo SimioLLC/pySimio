@@ -11,3 +11,15 @@ def exception_handler(func):
         except AuthenticationError as e:
             logger.fatal(f"An error occurred, please try again later. {e}")
         return wrapper
+    
+
+class IncompatibleVersionError(Exception):
+    pass
+
+def exception_handler(func):
+    def wrapper(self, *args, **kwargs):
+        try:
+            return func(self, *args, **kwargs)
+        except IncompatibleVersionError as e:
+            logger.fatal(f"An error occured. {e}.")
+    return wrapper
