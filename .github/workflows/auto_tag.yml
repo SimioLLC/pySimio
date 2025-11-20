@@ -1,0 +1,43 @@
+name: Auto Tag on PR Merge
+
+on: 
+  pull_request:
+    types:
+      - closed
+    branches:
+      - main
+jobs:
+  tag-release:
+    # Only run this job if the Pull Request was actually merged (not just closed)
+    if: github.event.pull_request.merged == true
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v4
+        with:
+          # Required for git tagging actions to read previous tags
+          fetch-depth: 0 
+          # Use the repository token for authentication
+          token: ${{ secrets.GITHUB_TOKEN }}
+    
+      - name: Get Latest Tag (Optional, for debugging)
+        run: |
+          echo "Current Tags in Repo:"
+          git tag -l
+          echo "Latest Tag:"
+          git describe --tags --abbrev=0
+    
+      - name: Automatic Version Bump and Tagging
+        # This action determines the bump (major, minor, or patch) based on conventional commit messages
+        # E.g., 'fix:', 'feat:', 'BREAKING CHANGE:'
+        uses: 'anothrNick/github-tag-action@1.70.0'
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          # Set the default bump to 'patch' if no conventional commits are found
+          DEFAULT_BUMP: feat
+          # The format for the new tag (e.g., v1.2.3)
+          WITH_V: false
+          # Determine the bump based on the commit messages from the merged PR
+          # Set the scope to the current branch
+          RELEASE_BRANCHES: main
