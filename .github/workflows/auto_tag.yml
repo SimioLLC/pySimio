@@ -35,7 +35,7 @@ jobs:
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           # Set the default bump to 'patch' if no conventional commits are found
-          DEFAULT_BUMP: feat
+          DEFAULT_BUMP: minor
           # The format for the new tag (e.g., v1.2.3)
           WITH_V: false
           # Determine the bump based on the commit messages from the merged PR
