@@ -634,3 +634,368 @@ class pySimio():
                 raise HTTPException.from_status_code(status_code=request.status_code)(message=request.text)
         except Exception:
             self.logger.exception("An unhandled exception occurred - please try again")
+
+    @retry(retry=retry_if_exception_type(UnauthorizedException), stop=stop_after_attempt(2), before=lambda retry_state: retry_state.args[0].reauthenticate())
+    def getScenariosLogSchemas(self, 
+                  runId: int,
+                  logName: str = None
+                ): 
+        try:
+            params = []
+            params.append(('run_id', runId))
+            if logName is not None:
+                params.append(('log_name', logName))
+            scenariosLogSchemaRequest = requests.get(f"{self.apiURL}/v1/runs/{runId}/scenarios/log-schemas", params=params, headers=self.headers)
+            if scenariosLogSchemaRequest.status_code == 200:
+                return scenariosLogSchemaRequest.json()
+            elif scenariosLogSchemaRequest.status_code == 204:
+                return {}
+            else:
+                raise HTTPException.from_status_code(status_code=scenariosLogSchemaRequest.status_code)(message=scenariosLogSchemaRequest.text)
+        except Exception:
+            self.logger.exception("An unhandled exception occurred - please try again")
+
+    @retry(retry=retry_if_exception_type(UnauthorizedException), stop=stop_after_attempt(2), before=lambda retry_state: retry_state.args[0].reauthenticate())
+    def getScenariosResourceUsageLogData(self, 
+                  runId: int,
+                  page: int = None,
+                  pageSize: int = None
+                ): 
+        try:
+            params = []
+            params.append(('run_id', runId))
+            if page is not None:
+                params.append(('page', page))
+            if pageSize is not None:
+                params.append(('page_size', pageSize))
+            scenariosLogDataRequest = requests.get(f"{self.apiURL}/v1/runs/{runId}/scenarios/log-data/resource-usage-log", params=params, headers=self.headers)
+            if scenariosLogDataRequest.status_code == 200:
+                return scenariosLogDataRequest.json()
+            elif scenariosLogDataRequest.status_code == 204:
+                return {}
+            else:
+                raise HTTPException.from_status_code(status_code=scenariosLogDataRequest.status_code)(message=scenariosLogDataRequest.text)
+        except Exception:
+            self.logger.exception("An unhandled exception occurred - please try again")
+
+    @retry(retry=retry_if_exception_type(UnauthorizedException), stop=stop_after_attempt(2), before=lambda retry_state: retry_state.args[0].reauthenticate())
+    def getScenariosResourceStateLogData(self, 
+                  runId: int,
+                  page: int = None,
+                  pageSize: int = None
+                ): 
+        try:
+            params = []
+            params.append(('run_id', runId))
+            if page is not None:
+                params.append(('page', page))
+            if pageSize is not None:
+                params.append(('page_size', pageSize))
+            scenariosLogDataRequest = requests.get(f"{self.apiURL}/v1/runs/{runId}/scenarios/log-data/resource-state-log", params=params, headers=self.headers)
+            if scenariosLogDataRequest.status_code == 200:
+                return scenariosLogDataRequest.json()
+            elif scenariosLogDataRequest.status_code == 204:
+                return {}
+            else:
+                raise HTTPException.from_status_code(status_code=scenariosLogDataRequest.status_code)(message=scenariosLogDataRequest.text)
+        except Exception:
+            self.logger.exception("An unhandled exception occurred - please try again")
+
+    @retry(retry=retry_if_exception_type(UnauthorizedException), stop=stop_after_attempt(2), before=lambda retry_state: retry_state.args[0].reauthenticate())
+    def getScenariosResourceCapacityLogData(self, 
+                  runId: int,
+                  page: int = None,
+                  pageSize: int = None
+                ): 
+        try:
+            params = []
+            params.append(('run_id', runId))
+            if page is not None:
+                params.append(('page', page))
+            if pageSize is not None:
+                params.append(('page_size', pageSize))
+            scenariosLogDataRequest = requests.get(f"{self.apiURL}/v1/runs/{runId}/scenarios/log-data/resource-capacity-log", params=params, headers=self.headers)
+            if scenariosLogDataRequest.status_code == 200:
+                return scenariosLogDataRequest.json()
+            elif scenariosLogDataRequest.status_code == 204:
+                return {}
+            else:
+                raise HTTPException.from_status_code(status_code=scenariosLogDataRequest.status_code)(message=scenariosLogDataRequest.text)
+        except Exception:
+            self.logger.exception("An unhandled exception occurred - please try again")
+
+    @retry(retry=retry_if_exception_type(UnauthorizedException), stop=stop_after_attempt(2), before=lambda retry_state: retry_state.args[0].reauthenticate())
+    def getScenariosTransporterUsageLogData(self, 
+                  runId: int,
+                  page: int = None,
+                  pageSize: int = None
+                ): 
+        try:
+            params = []
+            params.append(('run_id', runId))
+            if page is not None:
+                params.append(('page', page))
+            if pageSize is not None:
+                params.append(('page_size', pageSize))
+            scenariosLogDataRequest = requests.get(f"{self.apiURL}/v1/runs/{runId}/scenarios/log-data/transporter-usage-log", params=params, headers=self.headers)
+            if scenariosLogDataRequest.status_code == 200:
+                return scenariosLogDataRequest.json()
+            elif scenariosLogDataRequest.status_code == 204:
+                return {}
+            else:
+                raise HTTPException.from_status_code(status_code=scenariosLogDataRequest.status_code)(message=scenariosLogDataRequest.text)
+        except Exception:
+            self.logger.exception("An unhandled exception occurred - please try again")
+
+    @retry(retry=retry_if_exception_type(UnauthorizedException), stop=stop_after_attempt(2), before=lambda retry_state: retry_state.args[0].reauthenticate())
+    def getScenariosConstraintLogData(self, 
+                  runId: int,
+                  page: int = None,
+                  pageSize: int = None
+                ): 
+        try:
+            params = []
+            params.append(('run_id', runId))
+            if page is not None:
+                params.append(('page', page))
+            if pageSize is not None:
+                params.append(('page_size', pageSize))
+            scenariosLogDataRequest = requests.get(f"{self.apiURL}/v1/runs/{runId}/scenarios/log-data/constraint-log", params=params, headers=self.headers)
+            if scenariosLogDataRequest.status_code == 200:
+                return scenariosLogDataRequest.json()
+            elif scenariosLogDataRequest.status_code == 204:
+                return {}
+            else:
+                raise HTTPException.from_status_code(status_code=scenariosLogDataRequest.status_code)(message=scenariosLogDataRequest.text)
+        except Exception:
+            self.logger.exception("An unhandled exception occurred - please try again")
+
+    @retry(retry=retry_if_exception_type(UnauthorizedException), stop=stop_after_attempt(2), before=lambda retry_state: retry_state.args[0].reauthenticate())
+    def getScenariosMaterialUsageLogData(self, 
+                  runId: int,
+                  page: int = None,
+                  pageSize: int = None
+                ): 
+        try:
+            params = []
+            params.append(('run_id', runId))
+            if page is not None:
+                params.append(('page', page))
+            if pageSize is not None:
+                params.append(('page_size', pageSize))
+            scenariosLogDataRequest = requests.get(f"{self.apiURL}/v1/runs/{runId}/scenarios/log-data/material-usage-log", params=params, headers=self.headers)
+            if scenariosLogDataRequest.status_code == 200:
+                return scenariosLogDataRequest.json()
+            elif scenariosLogDataRequest.status_code == 204:
+                return {}
+            else:
+                raise HTTPException.from_status_code(status_code=scenariosLogDataRequest.status_code)(message=scenariosLogDataRequest.text)
+        except Exception:
+            self.logger.exception("An unhandled exception occurred - please try again")
+
+    @retry(retry=retry_if_exception_type(UnauthorizedException), stop=stop_after_attempt(2), before=lambda retry_state: retry_state.args[0].reauthenticate())
+    def getScenariosInventoryReviewLogData(self, 
+                  runId: int,
+                  page: int = None,
+                  pageSize: int = None
+                ): 
+        try:
+            params = []
+            params.append(('run_id', runId))
+            if page is not None:
+                params.append(('page', page))
+            if pageSize is not None:
+                params.append(('page_size', pageSize))
+            scenariosLogDataRequest = requests.get(f"{self.apiURL}/v1/runs/{runId}/scenarios/log-data/inventory-review-log", params=params, headers=self.headers)
+            if scenariosLogDataRequest.status_code == 200:
+                return scenariosLogDataRequest.json()
+            elif scenariosLogDataRequest.status_code == 204:
+                return {}
+            else:
+                raise HTTPException.from_status_code(status_code=scenariosLogDataRequest.status_code)(message=scenariosLogDataRequest.text)
+        except Exception:
+            self.logger.exception("An unhandled exception occurred - please try again")
+
+    @retry(retry=retry_if_exception_type(UnauthorizedException), stop=stop_after_attempt(2), before=lambda retry_state: retry_state.args[0].reauthenticate())
+    def getScenariosStateObservationLogData(self, 
+                  runId: int,
+                  page: int = None,
+                  pageSize: int = None
+                ): 
+        try:
+            params = []
+            params.append(('run_id', runId))
+            if page is not None:
+                params.append(('page', page))
+            if pageSize is not None:
+                params.append(('page_size', pageSize))
+            scenariosLogDataRequest = requests.get(f"{self.apiURL}/v1/runs/{runId}/scenarios/log-data/state-observation-log", params=params, headers=self.headers)
+            if scenariosLogDataRequest.status_code == 200:
+                return scenariosLogDataRequest.json()
+            elif scenariosLogDataRequest.status_code == 204:
+                return {}
+            else:
+                raise HTTPException.from_status_code(status_code=scenariosLogDataRequest.status_code)(message=scenariosLogDataRequest.text)
+        except Exception:
+            self.logger.exception("An unhandled exception occurred - please try again")
+
+    @retry(retry=retry_if_exception_type(UnauthorizedException), stop=stop_after_attempt(2), before=lambda retry_state: retry_state.args[0].reauthenticate())
+    def getScenariosTallyObservationLogData(self, 
+                  runId: int,
+                  page: int = None,
+                  pageSize: int = None
+                ): 
+        try:
+            params = []
+            params.append(('run_id', runId))
+            if page is not None:
+                params.append(('page', page))
+            if pageSize is not None:
+                params.append(('page_size', pageSize))
+            scenariosLogDataRequest = requests.get(f"{self.apiURL}/v1/runs/{runId}/scenarios/log-data/tally-observation-log", params=params, headers=self.headers)
+            if scenariosLogDataRequest.status_code == 200:
+                return scenariosLogDataRequest.json()
+            elif scenariosLogDataRequest.status_code == 204:
+                return {}
+            else:
+                raise HTTPException.from_status_code(status_code=scenariosLogDataRequest.status_code)(message=scenariosLogDataRequest.text)
+        except Exception:
+            self.logger.exception("An unhandled exception occurred - please try again")
+
+    @retry(retry=retry_if_exception_type(UnauthorizedException), stop=stop_after_attempt(2), before=lambda retry_state: retry_state.args[0].reauthenticate())
+    def getScenariosTaskLogData(self, 
+                  runId: int,
+                  page: int = None,
+                  pageSize: int = None
+                ): 
+        try:
+            params = []
+            params.append(('run_id', runId))
+            if page is not None:
+                params.append(('page', page))
+            if pageSize is not None:
+                params.append(('page_size', pageSize))
+            scenariosLogDataRequest = requests.get(f"{self.apiURL}/v1/runs/{runId}/scenarios/log-data/task-log", params=params, headers=self.headers)
+            if scenariosLogDataRequest.status_code == 200:
+                return scenariosLogDataRequest.json()
+            elif scenariosLogDataRequest.status_code == 204:
+                return {}
+            else:
+                raise HTTPException.from_status_code(status_code=scenariosLogDataRequest.status_code)(message=scenariosLogDataRequest.text)
+        except Exception:
+            self.logger.exception("An unhandled exception occurred - please try again")
+
+    @retry(retry=retry_if_exception_type(UnauthorizedException), stop=stop_after_attempt(2), before=lambda retry_state: retry_state.args[0].reauthenticate())
+    def getScenariosTaskStateLogData(self, 
+                  runId: int,
+                  page: int = None,
+                  pageSize: int = None
+                ): 
+        try:
+            params = []
+            params.append(('run_id', runId))
+            if page is not None:
+                params.append(('page', page))
+            if pageSize is not None:
+                params.append(('page_size', pageSize))
+            scenariosLogDataRequest = requests.get(f"{self.apiURL}/v1/runs/{runId}/scenarios/log-data/task-state-log", params=params, headers=self.headers)
+            if scenariosLogDataRequest.status_code == 200:
+                return scenariosLogDataRequest.json()
+            elif scenariosLogDataRequest.status_code == 204:
+                return {}
+            else:
+                raise HTTPException.from_status_code(status_code=scenariosLogDataRequest.status_code)(message=scenariosLogDataRequest.text)
+        except Exception:
+            self.logger.exception("An unhandled exception occurred - please try again")
+
+    @retry(retry=retry_if_exception_type(UnauthorizedException), stop=stop_after_attempt(2), before=lambda retry_state: retry_state.args[0].reauthenticate())
+    def getScenariosResourceInformationLogData(self, 
+                  runId: int,
+                  page: int = None,
+                  pageSize: int = None
+                ): 
+        try:
+            params = []
+            params.append(('run_id', runId))
+            if page is not None:
+                params.append(('page', page))
+            if pageSize is not None:
+                params.append(('page_size', pageSize))
+            scenariosLogDataRequest = requests.get(f"{self.apiURL}/v1/runs/{runId}/scenarios/log-data/resource-information-log", params=params, headers=self.headers)
+            if scenariosLogDataRequest.status_code == 200:
+                return scenariosLogDataRequest.json()
+            elif scenariosLogDataRequest.status_code == 204:
+                return {}
+            else:
+                raise HTTPException.from_status_code(status_code=scenariosLogDataRequest.status_code)(message=scenariosLogDataRequest.text)
+        except Exception:
+            self.logger.exception("An unhandled exception occurred - please try again")
+
+    @retry(retry=retry_if_exception_type(UnauthorizedException), stop=stop_after_attempt(2), before=lambda retry_state: retry_state.args[0].reauthenticate())
+    def getScenariosPeriodicOutputStatisticLogData(self, 
+                  runId: int,
+                  page: int = None,
+                  pageSize: int = None
+                ): 
+        try:
+            params = []
+            params.append(('run_id', runId))
+            if page is not None:
+                params.append(('page', page))
+            if pageSize is not None:
+                params.append(('page_size', pageSize))
+            scenariosLogDataRequest = requests.get(f"{self.apiURL}/v1/runs/{runId}/scenarios/log-data/periodic-output-statistic-log", params=params, headers=self.headers)
+            if scenariosLogDataRequest.status_code == 200:
+                return scenariosLogDataRequest.json()
+            elif scenariosLogDataRequest.status_code == 204:
+                return {}
+            else:
+                raise HTTPException.from_status_code(status_code=scenariosLogDataRequest.status_code)(message=scenariosLogDataRequest.text)
+        except Exception:
+            self.logger.exception("An unhandled exception occurred - please try again")
+
+    @retry(retry=retry_if_exception_type(UnauthorizedException), stop=stop_after_attempt(2), before=lambda retry_state: retry_state.args[0].reauthenticate())
+    def getScenariosPeriodicStateStatisticLogData(self, 
+                  runId: int,
+                  page: int = None,
+                  pageSize: int = None
+                ): 
+        try:
+            params = []
+            params.append(('run_id', runId))
+            if page is not None:
+                params.append(('page', page))
+            if pageSize is not None:
+                params.append(('page_size', pageSize))
+            scenariosLogDataRequest = requests.get(f"{self.apiURL}/v1/runs/{runId}/scenarios/log-data/periodic-state-statistic-log", params=params, headers=self.headers)
+            if scenariosLogDataRequest.status_code == 200:
+                return scenariosLogDataRequest.json()
+            elif scenariosLogDataRequest.status_code == 204:
+                return {}
+            else:
+                raise HTTPException.from_status_code(status_code=scenariosLogDataRequest.status_code)(message=scenariosLogDataRequest.text)
+        except Exception:
+            self.logger.exception("An unhandled exception occurred - please try again")
+
+    @retry(retry=retry_if_exception_type(UnauthorizedException), stop=stop_after_attempt(2), before=lambda retry_state: retry_state.args[0].reauthenticate())
+    def getScenariosPeriodicTallyStatisticLogData(self, 
+                  runId: int,
+                  page: int = None,
+                  pageSize: int = None
+                ): 
+        try:
+            params = []
+            params.append(('run_id', runId))
+            if page is not None:
+                params.append(('page', page))
+            if pageSize is not None:
+                params.append(('page_size', pageSize))
+            scenariosLogDataRequest = requests.get(f"{self.apiURL}/v1/runs/{runId}/scenarios/log-data/periodic-tally-statistic-log", params=params, headers=self.headers)
+            if scenariosLogDataRequest.status_code == 200:
+                return scenariosLogDataRequest.json()
+            elif scenariosLogDataRequest.status_code == 204:
+                return {}
+            else:
+                raise HTTPException.from_status_code(status_code=scenariosLogDataRequest.status_code)(message=scenariosLogDataRequest.text)
+        except Exception:
+            self.logger.exception("An unhandled exception occurred - please try again")
