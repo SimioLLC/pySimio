@@ -1012,3 +1012,13 @@ class pySimio():
                 raise HTTPException.from_status_code(status_code=scenariosLogDataRequest.status_code)(message=scenariosLogDataRequest.text)
         except Exception:
             self.logger.exception("An unhandled exception occurred - please try again")
+
+    def getTotalRunsInProgress(self):
+        try:
+            request = requests.get(f"{self.apiURL}/v1/runs/total-runs-in-progress", headers=self.headers)
+            if request.status_code == 200:
+                return request.json()
+            else:
+                raise HTTPException.from_status_code(status_code=request.status_code)(message=request.text)
+        except Exception:
+            self.logger.exception("An unhandled exception occurred - please try again")
