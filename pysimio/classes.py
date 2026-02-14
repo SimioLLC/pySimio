@@ -1,6 +1,6 @@
 from datetime import datetime, timezone
 from dataclasses import dataclass, asdict, fields
-from typing import Optional
+from typing import Optional, List
 import json
 
 @dataclass
@@ -159,3 +159,66 @@ class SimioModel(SimioDataClass):
     projectUploadDateTime: Optional[str] = None
     projectSavedDate: Optional[str] = None
     projectSavedInVersion: Optional[str] = None
+
+@dataclass
+class SimioRun(SimioDataClass):
+    id: int 
+    experimentId: Optional[int] = None
+    name : Optional[str] = None
+    description: Optional[str] = None
+    status: Optional[str] = None 
+    submissionTime: Optional[str] = None 
+    createdTime: Optional[str] = None 
+    scenarioNames: Optional[List[str]] = None 
+    totalReplications: Optional[int] = None
+    completedReplications: Optional[int] = None 
+    statusMessage: Optional[str] = None 
+    warningMessage: Optional[str] = None 
+    modelId: Optional[int] = None 
+    creatorName: Optional[str] = None 
+    projectId: Optional[int] = None 
+    projectName: Optional[str] = None 
+    modelName: Optional[str] = None 
+    modelRiskAnalysisConfidenceLevel: Optional[int] = None 
+    riskAnalysisConfidenceLevel: Optional[int] = None 
+    warmUpPeriodHours: Optional[int] = None 
+    upperPercentile: Optional[str] = None 
+    lowerPercentile: Optional[str] = None 
+    primaryResponse: Optional[str] = None
+    defaultReplicationsRequired: Optional[int] = None 
+    concurrentReplicationLimit: Optional[int] = None
+    startTime: Optional[str] = None 
+    endTime: Optional[str] = None 
+    planRun: Optional[bool] = None 
+    replicationRun: Optional[bool] = None 
+    additionalRunsStatus: Optional[List[str]] = None
+    timeOptions: Optional[TimeOptions] = None
+    isModelOwner: Optional[bool] = None
+    isModelUser: Optional[bool] = None
+    startUsingCurrentTimeZoneIdentifier: Optional[str] = None
+
+
+@dataclass
+class SimioProject(SimioDataClass):
+    projectId: Optional[int] = None
+    projectName: Optional[str] = None
+    modelId: Optional[List[int]] = None
+
+@dataclass
+class SimioScenario(SimioDataClass):
+    scenarioName: Optional[str] = None
+    replicationsCompleted: Optional[int] = None 
+    replicationsRequired: Optional[int] = None 
+    controlValues: Optional[List] = None 
+    responseValues: Optional[List] = None 
+    connectorConfigurations: Optional[List] = None 
+    activeTableBindings: Optional[List] = None 
+
+@dataclass
+class SimioTable(SimioDataClass):
+    name: Optional[str] = None
+    columnSchemas: Optional[List[tuple[str,str]]] = None
+    stateSchemas: Optional[List] = None
+    targetSchemas: Optional[List] = None 
+    columnIncomingRelationSchemas: Optional[List] = None 
+    stateIncomingRelationSchemas: Optional[List] = None

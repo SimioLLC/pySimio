@@ -4,7 +4,7 @@ from http_exceptions import HTTPException, UnauthorizedException
 from tenacity import retry, retry_if_exception_type, stop_after_attempt
 from pysimio.exceptions import AuthenticationError, IncompatibleVersionError
 from pysimio.logger import logger
-from pysimio.classes import TimeOptions, SimioExperiment, SimioModel
+from pysimio.classes import SimioScenario, SimioTable, TimeOptions, SimioExperiment, SimioModel, SimioRun, SimioProject, SimioScenario
 
 class pySimio():
     def __init__(self, 
@@ -120,6 +120,7 @@ class pySimio():
         """        
         try:
             params = []
+            models = []
             if project_id is not None:
                 params.append(('project_id', project_id))
             if owned_models:
@@ -127,8 +128,13 @@ class pySimio():
             if include_published:
                 params.append(('include_published', include_published))
             modelsRequest = requests.get(f"{self.apiURL}/v1/models", params=params, headers=self.headers)
+            #iterate trhough models and build list of models rather than large JSON
+            modelsJSON = json.loads(modelsRequest.text)
+            for model in modelsJSON:
+                models.append(SimioModel.from_json(model))
+
             if modelsRequest.status_code == 200:
-                return modelsRequest.json()
+                return models
             elif modelsRequest.status_code == 204:
                 return {}
             else:
@@ -160,7 +166,8 @@ class pySimio():
                 params.append(("table_name", table_name))
             modelTableRequest = requests.get(f"{self.apiURL}/v1/models/{model_id}/table-schemas", headers=self.headers, params=params)
             if modelTableRequest.status_code == 200:
-                return modelTableRequest.json()
+                [tableScema] = modelTableRequest.json()
+                return SimioTable.from_json(tableScema)
             else:
                 raise HTTPException.from_status_code(status_code=modelTableRequest.status_code)(message=modelTableRequest.text)
         except Exception:
@@ -173,13 +180,20 @@ class pySimio():
                     ):
         try:
             params = []
+            experiments = []
             if model_id is not None:
                 params.append(('model_id', model_id))
             if include_published:
                 params.append(('include_published', include_published))
             experimentsRequest = requests.get(f"{self.apiURL}/v1/experiments", params=params, headers=self.headers)
+
+            experimentsJSON= json.loads(experimentsRequest.text)
+            for experiment in experimentsJSON:
+                experiments.append(SimioExperiment.from_json(experiment))
+
+
             if experimentsRequest.status_code == 200:
-                return experimentsRequest.json()
+                return experiments
             elif experimentsRequest.status_code == 204:
                 return {}
             else:
@@ -252,6 +266,7 @@ class pySimio():
             ):
         try:
             params = []
+            runs = []
             if experimentId is not None:
                 params.append(('experiment_id', experimentId))
             if experimentName is not None:
@@ -259,8 +274,13 @@ class pySimio():
             if modelId is not None:
                 params.append(('model_id', modelId))
             request = requests.get(f"{self.apiURL}/v1/runs", headers=self.headers, params=params)
+
+            runsJSON= json.loads(request.text)
+            for run in runsJSON:
+                runs.append(SimioRun.from_json(run))
+
             if request.status_code == 200:
-                return request.json()
+                return runs
             else:
                 raise HTTPException.from_status_code(status_code=request.status_code)(message=request.text)
         except Exception:
@@ -273,7 +293,7 @@ class pySimio():
         try:
             request = requests.get(f"{self.apiURL}/v1/runs/{runId}", headers=self.headers)
             if request.status_code == 200:
-                return request.json()
+                return SimioRun.from_json(request.json())
             else:
                 raise HTTPException.from_status_code(status_code=request.status_code)(message=request.text)
         except Exception:
@@ -552,8 +572,13 @@ class pySimio():
     def getProjects(self):
         try:
             request = requests.get(f"{self.apiURL}/v1/projects", headers=self.headers)
+            projects = []
+            projectsJSON= json.loads(request.text)
+            for project in projectsJSON:
+                projects.append(SimioProject.from_json(project))
+
             if request.status_code == 200:
-                return request.json()
+                return projects
             else:
                 raise HTTPException.from_status_code(status_code=request.status_code)(message=request.text)
         except Exception:
@@ -566,7 +591,7 @@ class pySimio():
         try:
             request = requests.get(f"{self.apiURL}/v1/projects/{projectId}", headers=self.headers)
             if request.status_code == 200:
-                return request.json()
+                return SimioProject.from_json(request.json())
             else:
                 raise HTTPException.from_status_code(status_code=request.status_code)(message=request.text)
         except Exception:
@@ -598,13 +623,19 @@ class pySimio():
                 ): 
         try:
             params = []
+            scenarios = []
             if run_id is not None:
                 params.append(('run_id', run_id))
             if include_observations:
                 params.append(('include_observations', include_observations))
             scenariosRequest = requests.get(f"{self.apiURL}/v1/runs/{run_id}/scenarios", params=params, headers=self.headers)
+
+            scenariosJSON= json.loads(scenariosRequest.text)
+            for scenario in scenariosJSON:
+                scenarios.append(SimioScenario.from_json(scenario))
+
             if scenariosRequest.status_code == 200:
-                return scenariosRequest.json()
+                return scenarios
             elif scenariosRequest.status_code == 204:
                 return {}
             else:
