@@ -20,7 +20,6 @@ class pySimio():
         self.logger = logger
         self.samlResponse = None
         self.portalVersion = ""
-        self.apiCompatibleVersion = "19.283"
            
     def status(self):
         """
@@ -84,7 +83,7 @@ class pySimio():
         except Exception:
             self.logger.exception("An unhandled exception occurred - please try again")
 
-    def is_version_compatible(self):
+    def is_version_compatible(self, compatible_version: str):
         def parse_version(v):
             try:
                 if not v:
@@ -94,10 +93,10 @@ class pySimio():
             except Exception:
                 return (0, 0)
 
-        base_major, base_minor = parse_version(self.apiCompatibleVersion)
+        compatible_major, compatible_minor = parse_version(compatible_version)
         current_major, current_minor = parse_version(self.portalVersion)
 
-        return (current_major, current_minor) >= (base_major, base_minor)
+        return (current_major, current_minor) >= (compatible_major, compatible_minor)
             
     @retry(retry=retry_if_exception_type(UnauthorizedException), stop=stop_after_attempt(2), before=lambda retry_state: retry_state.args[0].reauthenticate())
     def getModels(self, 
@@ -472,7 +471,8 @@ class pySimio():
                   tableName: str,
                   page: int = None,
                   pageSize: int = None,
-                  filter: str = None
+                  filter: str = None,
+                  columns: list = None
                   ):
         try:
             params = []
@@ -488,10 +488,17 @@ class pySimio():
                 params.append(('page_size', pageSize))
 
             if filter is not None:
-                if self.is_version_compatible():
+                apiFilterCompatibleVersion = "19.283"
+                if self.is_version_compatible(apiFilterCompatibleVersion):
                     params.append(('filter', filter))
                 else:
-                    raise IncompatibleVersionError(f"Filtering is not supported on portal versions below {self.apiCompatibleVersion}. Current version is {self.portalVersion}.")
+                    raise IncompatibleVersionError(f"Filtering is not supported on portal versions below {apiFilterCompatibleVersion}. Current version is {self.portalVersion}.")
+            if columns is not None:
+                apiColumnsCompatibleVersion = "19.287"
+                if self.is_version_compatible(apiColumnsCompatibleVersion):
+                    params.append(('columns', columns))
+                else:
+                    raise IncompatibleVersionError(f"Column selection is not supported on portal versions below {apiColumnsCompatibleVersion}. Current version is {self.portalVersion}.")
 
             request = requests.get(f"{self.apiURL}/v1/runs/{runId}/scenarios/{scenarioName}/table-data/{tableName}", headers=self.headers, params=params)
             if request.status_code == 200:
