@@ -12,6 +12,7 @@ requests = "^2.32.3"
 http-exceptions = "^0.2.10"
 tenacity = "^9.0.0"
 decorator = "^5.1.1"
+pydantic = "^2.8.2"
 
 
 [build-system]
