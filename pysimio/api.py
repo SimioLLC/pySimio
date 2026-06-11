@@ -2,9 +2,38 @@ import requests
 import json
 from http_exceptions import HTTPException, UnauthorizedException
 from tenacity import retry, retry_if_exception_type, stop_after_attempt
+from pydantic import TypeAdapter
 from pysimio.exceptions import AuthenticationError, IncompatibleVersionError
 from pysimio.logger import logger
-from pysimio.classes import TimeOptions, SimioExperiment, SimioModel
+from pysimio.classes import (
+    ConstraintRecord,
+    ExperimentRuns,
+    ExperimentRunProgress,
+    ExperimentRunScenarioImportExportStatus,
+    ExperimentRunScenarioResponseDataComputedResults,
+    InventoryReviewRecord,
+    LogSchemaDetails,
+    MaterialUsageRecord,
+    PeriodicOutputStatisticRecord,
+    PeriodicStateStatisticRecord,
+    PeriodicTallyStatisticRecord,
+    Project,
+    ResourceCapacityRecord,
+    ResourceInfoRecord,
+    ResourceStateRecord,
+    ResourceUsageRecord,
+    RunsInProgressStatistics,
+    SimioExperiment,
+    SimioModel,
+    SimioTableSchema,
+    StateObservationRecord,
+    TableRowData,
+    TallyObservationRecord,
+    TaskRecord,
+    TaskStateRecord,
+    TimeOptions,
+    TransporterUsageRecord,
+)
 
 class pySimio():
     def __init__(self, 
@@ -20,7 +49,7 @@ class pySimio():
         self.logger = logger
         self.samlResponse = None
         self.portalVersion = ""
-           
+
     def status(self):
         """
         Return the current heartbeat status from the Simio Portal Instance
@@ -127,9 +156,10 @@ class pySimio():
                 params.append(('include_published', include_published))
             modelsRequest = requests.get(f"{self.apiURL}/v1/models", params=params, headers=self.headers)
             if modelsRequest.status_code == 200:
-                return modelsRequest.json()
+                data = modelsRequest.json()
+                return [SimioModel.model_validate(item) for item in data]
             elif modelsRequest.status_code == 204:
-                return {}
+                return []
             else:
                 raise HTTPException.from_status_code(status_code=modelsRequest.status_code)(message=modelsRequest.text)
         except Exception:
@@ -142,7 +172,7 @@ class pySimio():
         try:
             modelRequest = requests.get(f"{self.apiURL}/v1/models/{model_id}", headers=self.headers)
             if modelRequest.status_code == 200:
-                return SimioModel.from_json(modelRequest.json())
+                return SimioModel.model_validate(modelRequest.json())
             else:
                 raise HTTPException.from_status_code(status_code=modelRequest.status_code)(message=modelRequest.text)
         except Exception:
@@ -159,7 +189,8 @@ class pySimio():
                 params.append(("table_name", table_name))
             modelTableRequest = requests.get(f"{self.apiURL}/v1/models/{model_id}/table-schemas", headers=self.headers, params=params)
             if modelTableRequest.status_code == 200:
-                return modelTableRequest.json()
+                data = modelTableRequest.json()
+                return [SimioTableSchema.model_validate(item) for item in data]
             else:
                 raise HTTPException.from_status_code(status_code=modelTableRequest.status_code)(message=modelTableRequest.text)
         except Exception:
@@ -178,9 +209,10 @@ class pySimio():
                 params.append(('include_published', include_published))
             experimentsRequest = requests.get(f"{self.apiURL}/v1/experiments", params=params, headers=self.headers)
             if experimentsRequest.status_code == 200:
-                return experimentsRequest.json()
+                data = experimentsRequest.json()
+                return [SimioExperiment.model_validate(item) for item in data]
             elif experimentsRequest.status_code == 204:
-                return {}
+                return []
             else:
                 raise HTTPException.from_status_code(status_code=experimentsRequest.status_code)(message=experimentsRequest.text)
         except Exception:
@@ -193,8 +225,7 @@ class pySimio():
         try:
             experimentRequest = requests.get(f"{self.apiURL}/v1/experiments/{experiment_id}", headers=self.headers)
             if experimentRequest.status_code == 200:
-                print(experimentRequest.json())
-                return SimioExperiment.from_json(experimentRequest.json())
+                return SimioExperiment.model_validate(experimentRequest.json())
             else:
                 raise HTTPException.from_status_code(status_code=experimentRequest.status_code)(message=experimentRequest.text)
         except Exception:
@@ -259,7 +290,8 @@ class pySimio():
                 params.append(('model_id', modelId))
             request = requests.get(f"{self.apiURL}/v1/runs", headers=self.headers, params=params)
             if request.status_code == 200:
-                return request.json()
+                data = request.json()
+                return [ExperimentRuns.model_validate(item) for item in data]
             else:
                 raise HTTPException.from_status_code(status_code=request.status_code)(message=request.text)
         except Exception:
@@ -272,7 +304,7 @@ class pySimio():
         try:
             request = requests.get(f"{self.apiURL}/v1/runs/{runId}", headers=self.headers)
             if request.status_code == 200:
-                return request.json()
+                return ExperimentRuns.model_validate(request.json())
             else:
                 raise HTTPException.from_status_code(status_code=request.status_code)(message=request.text)
         except Exception:
@@ -285,7 +317,7 @@ class pySimio():
         try:
             request = requests.get(f"{self.apiURL}/v1/runs/{runId}/progress", headers=self.headers)
             if request.status_code == 200:
-                return request.json()
+                return ExperimentRunProgress.model_validate(request.json())
             else:
                 raise HTTPException.from_status_code(status_code=request.status_code)(message=request.text)
         except Exception:
@@ -364,7 +396,7 @@ class pySimio():
             }
             request = requests.post(f"{self.apiURL}/v1/runs/create", headers=self.headers, json=body)
             if request.status_code == 201:
-                return request.json()
+                return TypeAdapter(int).validate_python(request.json())
             else:
                 raise HTTPException.from_status_code(status_code=request.status_code)(message=request.text)
         except Exception:
@@ -378,7 +410,7 @@ class pySimio():
             body = experimentRunData
             request = requests.post(f"{self.apiURL}/v1/runs/start-experiment-run", headers=self.headers, json=body)
             if request.status_code == 201:
-                return request.json()
+                return TypeAdapter(int).validate_python(request.json())
             else:
                 raise HTTPException.from_status_code(status_code=request.status_code)(message=request.text)
         except Exception:
@@ -400,7 +432,7 @@ class pySimio():
             }
             request = requests.post(f"{self.apiURL}/v1/runs/create-from-existing", headers=self.headers, json=body)
             if request.status_code == 201:
-                return request.json()
+                return TypeAdapter(int).validate_python(request.json())
             else:
                 raise HTTPException.from_status_code(status_code=request.status_code)(message=request.text)
         except Exception:
@@ -420,7 +452,7 @@ class pySimio():
             }
             request = requests.post(f"{self.apiURL}/v1/runs/start-existing-plan-run", headers=self.headers, json=body)
             if request.status_code == 201:
-                return request.json()
+                return TypeAdapter(int).validate_python(request.json())
             else:
                 raise HTTPException.from_status_code(status_code=request.status_code)(message=request.text)
         except Exception:
@@ -439,7 +471,7 @@ class pySimio():
                 params.append(('export_id', exportId))
             request = requests.get(f"{self.apiURL}/v1/runs/{runId}/scenarios/exports/{exportId}", headers=self.headers, params=params)
             if request.status_code == 200:
-                return request.json()
+                return ExperimentRunScenarioImportExportStatus.model_validate(request.json())
             else:
                 raise HTTPException.from_status_code(status_code=request.status_code)(message=request.text)
         except Exception:
@@ -458,7 +490,7 @@ class pySimio():
                 params.append(('export_id', importId))
             request = requests.get(f"{self.apiURL}/v1/runs/{runId}/scenarios/imports/{importId}", headers=self.headers, params=params)
             if request.status_code == 200:
-                return request.json()
+                return ExperimentRunScenarioImportExportStatus.model_validate(request.json())
             else:
                 raise HTTPException.from_status_code(status_code=request.status_code)(message=request.text)
         except Exception:
@@ -502,7 +534,8 @@ class pySimio():
 
             request = requests.get(f"{self.apiURL}/v1/runs/{runId}/scenarios/{scenarioName}/table-data/{tableName}", headers=self.headers, params=params)
             if request.status_code == 200:
-                return request.json()
+                data = request.json()
+                return [TableRowData.model_validate(item) for item in data]
             else:
                 raise HTTPException.from_status_code(status_code=request.status_code)(message=request.text)
         except Exception:
@@ -560,7 +593,8 @@ class pySimio():
         try:
             request = requests.get(f"{self.apiURL}/v1/projects", headers=self.headers)
             if request.status_code == 200:
-                return request.json()
+                data = request.json()
+                return [Project.model_validate(item) for item in data]
             else:
                 raise HTTPException.from_status_code(status_code=request.status_code)(message=request.text)
         except Exception:
@@ -573,7 +607,7 @@ class pySimio():
         try:
             request = requests.get(f"{self.apiURL}/v1/projects/{projectId}", headers=self.headers)
             if request.status_code == 200:
-                return request.json()
+                return Project.model_validate(request.json())
             else:
                 raise HTTPException.from_status_code(status_code=request.status_code)(message=request.text)
         except Exception:
@@ -611,9 +645,10 @@ class pySimio():
                 params.append(('include_observations', include_observations))
             scenariosRequest = requests.get(f"{self.apiURL}/v1/runs/{run_id}/scenarios", params=params, headers=self.headers)
             if scenariosRequest.status_code == 200:
-                return scenariosRequest.json()
+                data = scenariosRequest.json()
+                return [ExperimentRunScenarioResponseDataComputedResults.model_validate(item) for item in data]
             elif scenariosRequest.status_code == 204:
-                return {}
+                return []
             else:
                 raise HTTPException.from_status_code(status_code=scenariosRequest.status_code)(message=scenariosRequest.text)
         except Exception:
@@ -667,9 +702,10 @@ class pySimio():
                 params.append(('log_name', logName))
             scenariosLogSchemaRequest = requests.get(f"{self.apiURL}/v1/runs/{runId}/scenarios/log-schemas", params=params, headers=self.headers)
             if scenariosLogSchemaRequest.status_code == 200:
-                return scenariosLogSchemaRequest.json()
+                data = scenariosLogSchemaRequest.json()
+                return [LogSchemaDetails.model_validate(item) for item in data]
             elif scenariosLogSchemaRequest.status_code == 204:
-                return {}
+                return []
             else:
                 raise HTTPException.from_status_code(status_code=scenariosLogSchemaRequest.status_code)(message=scenariosLogSchemaRequest.text)
         except Exception:
@@ -690,9 +726,10 @@ class pySimio():
                 params.append(('page_size', pageSize))
             scenariosLogDataRequest = requests.get(f"{self.apiURL}/v1/runs/{runId}/scenarios/log-data/resource-usage-log", params=params, headers=self.headers)
             if scenariosLogDataRequest.status_code == 200:
-                return scenariosLogDataRequest.json()
+                data = scenariosLogDataRequest.json()
+                return [ResourceUsageRecord.model_validate(item) for item in data]
             elif scenariosLogDataRequest.status_code == 204:
-                return {}
+                return []
             else:
                 raise HTTPException.from_status_code(status_code=scenariosLogDataRequest.status_code)(message=scenariosLogDataRequest.text)
         except Exception:
@@ -713,9 +750,10 @@ class pySimio():
                 params.append(('page_size', pageSize))
             scenariosLogDataRequest = requests.get(f"{self.apiURL}/v1/runs/{runId}/scenarios/log-data/resource-state-log", params=params, headers=self.headers)
             if scenariosLogDataRequest.status_code == 200:
-                return scenariosLogDataRequest.json()
+                data = scenariosLogDataRequest.json()
+                return [ResourceStateRecord.model_validate(item) for item in data]
             elif scenariosLogDataRequest.status_code == 204:
-                return {}
+                return []
             else:
                 raise HTTPException.from_status_code(status_code=scenariosLogDataRequest.status_code)(message=scenariosLogDataRequest.text)
         except Exception:
@@ -736,9 +774,10 @@ class pySimio():
                 params.append(('page_size', pageSize))
             scenariosLogDataRequest = requests.get(f"{self.apiURL}/v1/runs/{runId}/scenarios/log-data/resource-capacity-log", params=params, headers=self.headers)
             if scenariosLogDataRequest.status_code == 200:
-                return scenariosLogDataRequest.json()
+                data = scenariosLogDataRequest.json()
+                return [ResourceCapacityRecord.model_validate(item) for item in data]   
             elif scenariosLogDataRequest.status_code == 204:
-                return {}
+                return []
             else:
                 raise HTTPException.from_status_code(status_code=scenariosLogDataRequest.status_code)(message=scenariosLogDataRequest.text)
         except Exception:
@@ -759,9 +798,10 @@ class pySimio():
                 params.append(('page_size', pageSize))
             scenariosLogDataRequest = requests.get(f"{self.apiURL}/v1/runs/{runId}/scenarios/log-data/transporter-usage-log", params=params, headers=self.headers)
             if scenariosLogDataRequest.status_code == 200:
-                return scenariosLogDataRequest.json()
+                data = scenariosLogDataRequest.json()
+                return [TransporterUsageRecord.model_validate(item) for item in data]
             elif scenariosLogDataRequest.status_code == 204:
-                return {}
+                return []
             else:
                 raise HTTPException.from_status_code(status_code=scenariosLogDataRequest.status_code)(message=scenariosLogDataRequest.text)
         except Exception:
@@ -782,9 +822,10 @@ class pySimio():
                 params.append(('page_size', pageSize))
             scenariosLogDataRequest = requests.get(f"{self.apiURL}/v1/runs/{runId}/scenarios/log-data/constraint-log", params=params, headers=self.headers)
             if scenariosLogDataRequest.status_code == 200:
-                return scenariosLogDataRequest.json()
+                data = scenariosLogDataRequest.json()
+                return [ConstraintRecord.model_validate(item) for item in data]
             elif scenariosLogDataRequest.status_code == 204:
-                return {}
+                return []
             else:
                 raise HTTPException.from_status_code(status_code=scenariosLogDataRequest.status_code)(message=scenariosLogDataRequest.text)
         except Exception:
@@ -805,9 +846,10 @@ class pySimio():
                 params.append(('page_size', pageSize))
             scenariosLogDataRequest = requests.get(f"{self.apiURL}/v1/runs/{runId}/scenarios/log-data/material-usage-log", params=params, headers=self.headers)
             if scenariosLogDataRequest.status_code == 200:
-                return scenariosLogDataRequest.json()
+                data = scenariosLogDataRequest.json()
+                return [MaterialUsageRecord.model_validate(item) for item in data]
             elif scenariosLogDataRequest.status_code == 204:
-                return {}
+                return []
             else:
                 raise HTTPException.from_status_code(status_code=scenariosLogDataRequest.status_code)(message=scenariosLogDataRequest.text)
         except Exception:
@@ -828,9 +870,10 @@ class pySimio():
                 params.append(('page_size', pageSize))
             scenariosLogDataRequest = requests.get(f"{self.apiURL}/v1/runs/{runId}/scenarios/log-data/inventory-review-log", params=params, headers=self.headers)
             if scenariosLogDataRequest.status_code == 200:
-                return scenariosLogDataRequest.json()
+                data = scenariosLogDataRequest.json()
+                return [InventoryReviewRecord.model_validate(item) for item in data]
             elif scenariosLogDataRequest.status_code == 204:
-                return {}
+                return []
             else:
                 raise HTTPException.from_status_code(status_code=scenariosLogDataRequest.status_code)(message=scenariosLogDataRequest.text)
         except Exception:
@@ -850,10 +893,11 @@ class pySimio():
             if pageSize is not None:
                 params.append(('page_size', pageSize))
             scenariosLogDataRequest = requests.get(f"{self.apiURL}/v1/runs/{runId}/scenarios/log-data/state-observation-log", params=params, headers=self.headers)
-            if scenariosLogDataRequest.status_code == 200:
-                return scenariosLogDataRequest.json()
+            if scenariosLogDataRequest.status_code == 200: 
+                data = scenariosLogDataRequest.json()
+                return [StateObservationRecord.model_validate(item) for item in data]
             elif scenariosLogDataRequest.status_code == 204:
-                return {}
+                return []
             else:
                 raise HTTPException.from_status_code(status_code=scenariosLogDataRequest.status_code)(message=scenariosLogDataRequest.text)
         except Exception:
@@ -874,9 +918,10 @@ class pySimio():
                 params.append(('page_size', pageSize))
             scenariosLogDataRequest = requests.get(f"{self.apiURL}/v1/runs/{runId}/scenarios/log-data/tally-observation-log", params=params, headers=self.headers)
             if scenariosLogDataRequest.status_code == 200:
-                return scenariosLogDataRequest.json()
+                data = scenariosLogDataRequest.json()
+                return [TallyObservationRecord.model_validate(item) for item in data]
             elif scenariosLogDataRequest.status_code == 204:
-                return {}
+                return []
             else:
                 raise HTTPException.from_status_code(status_code=scenariosLogDataRequest.status_code)(message=scenariosLogDataRequest.text)
         except Exception:
@@ -897,9 +942,10 @@ class pySimio():
                 params.append(('page_size', pageSize))
             scenariosLogDataRequest = requests.get(f"{self.apiURL}/v1/runs/{runId}/scenarios/log-data/task-log", params=params, headers=self.headers)
             if scenariosLogDataRequest.status_code == 200:
-                return scenariosLogDataRequest.json()
+                data = scenariosLogDataRequest.json()
+                return [TaskRecord.model_validate(item) for item in data]
             elif scenariosLogDataRequest.status_code == 204:
-                return {}
+                return []
             else:
                 raise HTTPException.from_status_code(status_code=scenariosLogDataRequest.status_code)(message=scenariosLogDataRequest.text)
         except Exception:
@@ -920,9 +966,10 @@ class pySimio():
                 params.append(('page_size', pageSize))
             scenariosLogDataRequest = requests.get(f"{self.apiURL}/v1/runs/{runId}/scenarios/log-data/task-state-log", params=params, headers=self.headers)
             if scenariosLogDataRequest.status_code == 200:
-                return scenariosLogDataRequest.json()
+                data = scenariosLogDataRequest.json()
+                return [TaskStateRecord.model_validate(item) for item in data]
             elif scenariosLogDataRequest.status_code == 204:
-                return {}
+                return []
             else:
                 raise HTTPException.from_status_code(status_code=scenariosLogDataRequest.status_code)(message=scenariosLogDataRequest.text)
         except Exception:
@@ -943,9 +990,10 @@ class pySimio():
                 params.append(('page_size', pageSize))
             scenariosLogDataRequest = requests.get(f"{self.apiURL}/v1/runs/{runId}/scenarios/log-data/resource-information-log", params=params, headers=self.headers)
             if scenariosLogDataRequest.status_code == 200:
-                return scenariosLogDataRequest.json()
+                data = scenariosLogDataRequest.json()
+                return [ResourceInfoRecord.model_validate(item) for item in data]
             elif scenariosLogDataRequest.status_code == 204:
-                return {}
+                return []
             else:
                 raise HTTPException.from_status_code(status_code=scenariosLogDataRequest.status_code)(message=scenariosLogDataRequest.text)
         except Exception:
@@ -966,9 +1014,10 @@ class pySimio():
                 params.append(('page_size', pageSize))
             scenariosLogDataRequest = requests.get(f"{self.apiURL}/v1/runs/{runId}/scenarios/log-data/periodic-output-statistic-log", params=params, headers=self.headers)
             if scenariosLogDataRequest.status_code == 200:
-                return scenariosLogDataRequest.json()
+                data = scenariosLogDataRequest.json()
+                return [PeriodicOutputStatisticRecord.model_validate(item) for item in data]
             elif scenariosLogDataRequest.status_code == 204:
-                return {}
+                return []
             else:
                 raise HTTPException.from_status_code(status_code=scenariosLogDataRequest.status_code)(message=scenariosLogDataRequest.text)
         except Exception:
@@ -989,9 +1038,10 @@ class pySimio():
                 params.append(('page_size', pageSize))
             scenariosLogDataRequest = requests.get(f"{self.apiURL}/v1/runs/{runId}/scenarios/log-data/periodic-state-statistic-log", params=params, headers=self.headers)
             if scenariosLogDataRequest.status_code == 200:
-                return scenariosLogDataRequest.json()
+                data = scenariosLogDataRequest.json()
+                return [PeriodicStateStatisticRecord.model_validate(item) for item in data]
             elif scenariosLogDataRequest.status_code == 204:
-                return {}
+                return []
             else:
                 raise HTTPException.from_status_code(status_code=scenariosLogDataRequest.status_code)(message=scenariosLogDataRequest.text)
         except Exception:
@@ -1012,9 +1062,10 @@ class pySimio():
                 params.append(('page_size', pageSize))
             scenariosLogDataRequest = requests.get(f"{self.apiURL}/v1/runs/{runId}/scenarios/log-data/periodic-tally-statistic-log", params=params, headers=self.headers)
             if scenariosLogDataRequest.status_code == 200:
-                return scenariosLogDataRequest.json()
+                data = scenariosLogDataRequest.json()
+                return [PeriodicTallyStatisticRecord.model_validate(item) for item in data]
             elif scenariosLogDataRequest.status_code == 204:
-                return {}
+                return []
             else:
                 raise HTTPException.from_status_code(status_code=scenariosLogDataRequest.status_code)(message=scenariosLogDataRequest.text)
         except Exception:
@@ -1024,7 +1075,8 @@ class pySimio():
         try:
             request = requests.get(f"{self.apiURL}/v1/runs/total-runs-in-progress", headers=self.headers)
             if request.status_code == 200:
-                return request.json()
+                data = request.json()
+                return [RunsInProgressStatistics.model_validate(item) for item in data]
             else:
                 raise HTTPException.from_status_code(status_code=request.status_code)(message=request.text)
         except Exception:
